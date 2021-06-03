@@ -1,2 +1,8 @@
 rootProject.name = "chat"
 include ':app'
+include ':domain'
+include ':data'
+include ':local'
+include ':remote'
+include ':core'
+include ':presentation'
