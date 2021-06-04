@@ -9,5 +9,12 @@ import com.cenkgun.local.models.SessionLocalModel.Companion.TABLE_NAME
 
 @Dao
 interface SessionDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun saveSession(session: SessionLocalModel)
 
+    @Query("DELETE FROM $TABLE_NAME")
+    suspend fun deleteSession()
+
+    @Query("SELECT * FROM $TABLE_NAME")
+    suspend fun getLoggedInUser(): SessionLocalModel?
 }
