@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nickname">Nickname</string>
+    <string name="enter_button_text">Enter</string>
+    <string name="login_validation_error_message">Nickname must be more than two characters</string>
+</resources>
