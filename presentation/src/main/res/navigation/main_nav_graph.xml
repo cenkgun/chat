@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_nav_graph"
+    app:startDestination="@id/login_fragment">
+
+    <fragment
+        android:id="@+id/login_fragment"
+        android:name="com.cenkgun.presentation.ui.login.fragments.LoginFragment"
+        android:label="SignInFragment"
+        tools:layout="@layout/fragment_login">
+        <action
+            android:id="@+id/action_login_fragment_to_message_fragment"
+            app:destination="@id/message_fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/message_fragment"
+        android:name="com.cenkgun.presentation.ui.message.fragments.MessageFragment"
+        android:label="ConversationFragment"
+        tools:layout="@layout/fragment_message">
+        <argument
+            android:name="user"
+            app:argType="com.cenkgun.presentation.models.UserModel" />
+    </fragment>
+</navigation>
