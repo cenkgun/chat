@@ -1,8 +1,8 @@
 package com.cenkgun.presentation.ui.login.viewmodel
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cenkgun.domain.providers.ResourceProvider
 import com.cenkgun.domain.usecases.GetLoggedInUserUseCase
 import com.cenkgun.domain.usecases.GetUserByNicknameUseCase
 import com.cenkgun.domain.usecases.SaveLoggedInUserUseCase
@@ -27,6 +27,7 @@ class LoginViewModel @Inject constructor(
     private val saveLoggedInUserUseCase: SaveLoggedInUserUseCase,
     private val loggedInUserUseCase: GetLoggedInUserUseCase,
     private val getUserByNicknameUseCase: GetUserByNicknameUseCase,
+    private val resourceProvider: ResourceProvider,
     private val userModelMapper: UserModelMapper,
     private val sessionModelMapper: SessionModelMapper
 ) : ViewModel() {
@@ -34,8 +35,8 @@ class LoginViewModel @Inject constructor(
     private val _navigateToMessagesFlow = MutableStateFlow<UserModel?>(null)
     val navigateToMessagesFlow get() : StateFlow<UserModel?> = _navigateToMessagesFlow
 
-    private val _showErrorFlow = MutableStateFlow(0)
-    val showErrorFlow get() : StateFlow<@StringRes Int> = _showErrorFlow
+    private val _showErrorFlow = MutableStateFlow("")
+    val showErrorFlow get() : StateFlow<String> = _showErrorFlow
 
     init {
         checkLoggedInUser()
@@ -58,7 +59,8 @@ class LoginViewModel @Inject constructor(
                     _navigateToMessagesFlow.value = this
                 }
             } else {
-                _showErrorFlow.value = R.string.login_validation_error_message
+                _showErrorFlow.value =
+                    resourceProvider.getString(R.string.login_validation_error_message)
             }
         }
     }

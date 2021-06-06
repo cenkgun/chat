@@ -110,8 +110,8 @@ class MessageFragment : Fragment() {
             }
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.showToastFlow.dropWhile { it == 0 }.collect {
-                showToast(getString(it))
+            viewModel.showToastFlow.dropWhile { it.isEmpty() }.collect { message ->
+                showToast(message)
             }
         }
         lifecycleScope.launchWhenStarted {
