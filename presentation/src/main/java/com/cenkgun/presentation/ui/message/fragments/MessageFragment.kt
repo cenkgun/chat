@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.dropWhile
 import reactivecircus.flowbinding.android.view.clicks
 import reactivecircus.flowbinding.android.view.focusChanges
+import reactivecircus.flowbinding.android.widget.textChanges
 
 @AndroidEntryPoint
 class MessageFragment : Fragment() {
@@ -63,7 +64,7 @@ class MessageFragment : Fragment() {
     private fun initLayout() {
         initToolbar()
         initMessageList()
-        initClickListeners()
+        initListeners()
     }
 
     private fun initToolbar() {
@@ -72,20 +73,6 @@ class MessageFragment : Fragment() {
             ContextCompat.getDrawable(requireContext(), R.drawable.ic_arrow_back)
         binding.toolbar.setNavigationOnClickListener {
             viewModel.leaveConversation()
-        }
-    }
-
-    private fun initClickListeners() {
-        lifecycleScope.launchWhenStarted {
-            binding.sendMessage.clicks().collect {
-                val messageText = binding.messageInput.text.toString()
-                viewModel.handleOnSendButtonClicked(messageText)
-            }
-        }
-        lifecycleScope.launchWhenStarted {
-            binding.messageInput.focusChanges().collect {
-                binding.messageList.smoothScrollToPosition(0)
-            }
         }
     }
 
@@ -99,6 +86,24 @@ class MessageFragment : Fragment() {
         linearLayoutManager.stackFromEnd = true
         binding.messageList.layoutManager = linearLayoutManager
         binding.messageList.adapter = adapter
+    }
+
+    private fun initListeners() {
+        lifecycleScope.launchWhenStarted {
+            binding.sendMessageButton.clicks().collect {
+                viewModel.handleOnSendButtonClicked()
+            }
+        }
+        lifecycleScope.launchWhenStarted {
+            binding.messageInput.focusChanges().collect {
+                binding.messageList.smoothScrollToPosition(0)
+            }
+        }
+        lifecycleScope.launchWhenStarted {
+            binding.messageInput.textChanges().collect {
+                viewModel.checkMessage(it.toString())
+            }
+        }
     }
 
     private fun observeViewModel() {
@@ -124,12 +129,11 @@ class MessageFragment : Fragment() {
             }
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.isSendButtonEnableFlow.collect {
-                binding.sendMessage.isEnabled = it
+            viewModel.sendButtonIsEnableFlow.collect { isEnabled ->
+                binding.sendMessageButton.isEnabled = isEnabled
             }
         }
     }
-
 
     override fun onDestroyView() {
         super.onDestroyView()
