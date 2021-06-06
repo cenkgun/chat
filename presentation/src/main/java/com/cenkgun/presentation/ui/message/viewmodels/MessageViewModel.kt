@@ -121,16 +121,20 @@ class MessageViewModel @Inject constructor(
         state[USER_SAVED_STATE_KEY] = user
     }
 
-    fun onSendButtonClicked(messageText: String) {
-        saveMessage(messageText)
-        _clearInputFlow.value = Any()
-    }
-
     fun leaveConversation() {
         viewModelScope.launch {
             deleteLoggedInUserUseCase()
             _leaveConversationFlow.value = true
         }
+    }
+
+    fun handleOnSendButtonClicked(messageText: String) {
+        saveMessage(messageText)
+        _clearInputFlow.value = Any()
+    }
+
+    fun handleOnBackPressed() {
+        leaveConversation()
     }
 
     companion object {

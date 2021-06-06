@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -49,6 +50,14 @@ class MessageFragment : Fragment() {
         viewModel.setLoggedInUser(args.user)
         observeViewModel()
         initLayout()
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    viewModel.handleOnBackPressed()
+                }
+            }
+        )
     }
 
     private fun initLayout() {
@@ -70,7 +79,7 @@ class MessageFragment : Fragment() {
         lifecycleScope.launchWhenStarted {
             binding.sendMessage.clicks().collect {
                 val messageText = binding.messageInput.text.toString()
-                viewModel.onSendButtonClicked(messageText)
+                viewModel.handleOnSendButtonClicked(messageText)
             }
         }
         lifecycleScope.launchWhenStarted {
