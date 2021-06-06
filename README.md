@@ -2,13 +2,8 @@
 
 ChatApp is a sample project that presents a modern, 2021 approach to [Android](https://en.wikipedia.org/wiki/Android_(operating_system)) application development.
 
-## Screenshots
-
-![login](https://github.com/cenkgun/chat/blob/develop/art/art-1.png?raw=true)
-![conversation-1](https://github.com/cenkgun/chat/blob/develop/art/art-2.png?raw=true)
-![conversation-2](https://github.com/cenkgun/chat/blob/develop/art/art-3.png?raw=true)
-![conversation-3](https://github.com/cenkgun/chat/blob/develop/art/art-4.png?raw=true)
-![conversation-4](https://github.com/cenkgun/chat/blob/develop/art/art-5.png?raw=true)
+## Screenshots 📷
+<img src="/art/art-1.png" width="260"> &emsp;<img src="/art/art-4.png" width="260"> &emsp;<img src="/art/art-5.png" width="260">
 
 ## Project Tech-stack
 
