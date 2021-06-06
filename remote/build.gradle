@@ -1,0 +1,70 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+
+        Properties properties = new Properties()
+        if (project.rootProject.file('local.properties').canRead()) {
+            properties.load(new FileInputStream(project.rootProject.file('local.properties')))
+            buildConfigField("String", "BASE_URL", properties["BASE_URL"])
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    def remoteDependencies = rootProject.ext
+
+    implementation(
+            remoteDependencies.appDependencies.daggerHiltViewModel,
+            remoteDependencies.appDependencies.daggerHiltAndroid,
+            remoteDependencies.appDependencies.javax,
+
+            remoteDependencies.remoteDependencies.gson,
+            remoteDependencies.remoteDependencies.retrofit,
+            remoteDependencies.remoteDependencies.retrofitConversion,
+            remoteDependencies.remoteDependencies.okHttp,
+            remoteDependencies.remoteDependencies.okHttpLoggingInterceptor,
+
+            remoteDependencies.appDependencies.kotlin,
+            remoteDependencies.appDependencies.coroutines,
+
+            project(":data"),
+            project(":core"),
+            project(":domain"),
+    )
+
+    kapt remoteDependencies.appDependencies.daggerXcompiler
+    kapt remoteDependencies.appDependencies.daggerCompiler
+}

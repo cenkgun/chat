@@ -1,0 +1,36 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_7
+    targetCompatibility = JavaVersion.VERSION_1_7
+}
+
+dependencies {
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    def dataDependencies = rootProject.ext
+
+    def testDependencies = rootProject.ext.testDependencies
+
+    implementation(
+            dataDependencies.appDependencies.kotlin,
+            dataDependencies.appDependencies.javax,
+            dataDependencies.appDependencies.coroutines,
+            dataDependencies.remoteDependencies.gson,
+
+            project(':domain')
+    )
+
+    testImplementation(
+            testDependencies.testRunner,
+            testDependencies.androidXTest,
+            testDependencies.androidXTestCore,
+            testDependencies.roboelectric,
+            testDependencies.truth,
+    )
+}
