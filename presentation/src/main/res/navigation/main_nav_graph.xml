@@ -23,5 +23,9 @@
         <argument
             android:name="user"
             app:argType="com.cenkgun.presentation.models.UserModel" />
+        <action
+            android:id="@+id/action_message_fragment_pop"
+            app:destination="@id/login_fragment"
+            app:popUpTo="@id/login_fragment" />
     </fragment>
 </navigation>
