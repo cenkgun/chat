@@ -1,18 +1,18 @@
 package com.cenkgun.presentation.ui.login.viewmodel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cenkgun.domain.providers.ResourceProvider
+import com.cenkgun.domain.helper.LoginValidationHelper
 import com.cenkgun.domain.usecases.GetLoggedInUserUseCase
 import com.cenkgun.domain.usecases.GetUserByNicknameUseCase
 import com.cenkgun.domain.usecases.SaveLoggedInUserUseCase
 import com.cenkgun.domain.usecases.SaveUserListUseCase
-import com.cenkgun.presentation.R
 import com.cenkgun.presentation.mapper.SessionModelMapper
 import com.cenkgun.presentation.mapper.UserModelMapper
 import com.cenkgun.presentation.models.SessionModel
 import com.cenkgun.presentation.models.UserModel
-import com.cenkgun.presentation.ui.login.validation.LoginValidationHelper
+import com.cenkgun.presentation.utils.stateFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -27,48 +27,49 @@ class LoginViewModel @Inject constructor(
     private val saveLoggedInUserUseCase: SaveLoggedInUserUseCase,
     private val loggedInUserUseCase: GetLoggedInUserUseCase,
     private val getUserByNicknameUseCase: GetUserByNicknameUseCase,
-    private val resourceProvider: ResourceProvider,
     private val userModelMapper: UserModelMapper,
-    private val sessionModelMapper: SessionModelMapper
+    private val sessionModelMapper: SessionModelMapper,
+    private val loginValidationHelper: LoginValidationHelper,
+    private val state: SavedStateHandle
 ) : ViewModel() {
+
+    private val _nicknameFlow
+        get() : StateFlow<String?> = state.stateFlow(
+            viewModelScope, NICKNAME_STATE_KEY, null
+        )
 
     private val _navigateToMessagesFlow = MutableStateFlow<UserModel?>(null)
     val navigateToMessagesFlow get() : StateFlow<UserModel?> = _navigateToMessagesFlow
 
-    private val _showErrorFlow = MutableStateFlow("")
-    val showErrorFlow get() : StateFlow<String> = _showErrorFlow
+    private val _continueButtonIsEnableFlow = MutableStateFlow(false)
+    val continueButtonIsEnableFlow get() = _continueButtonIsEnableFlow
 
     init {
         checkLoggedInUser()
     }
 
-    fun login(nickname: String) {
+    fun login() {
         viewModelScope.launch {
-            if (LoginValidationHelper.isValidNickname(nickname)) {
+            _nicknameFlow.value?.let { nickname ->
                 val existUser = getUserByNicknameUseCase(nickname)
-                existUser?.let {
-                    userModelMapper.mapToDomain(it).apply {
+                existUser?.let { user ->
+                    userModelMapper.mapToDomain(user).apply {
                         saveLoggedUser(this)
                         _navigateToMessagesFlow.value = this
                     }
                     return@launch
                 }
-                getUser(nickname).apply {
+                generateUserModelByNickname(nickname).apply {
                     saveUser(this)
                     saveLoggedUser(this)
                     _navigateToMessagesFlow.value = this
                 }
-            } else {
-                _showErrorFlow.value =
-                    resourceProvider.getString(R.string.login_validation_error_message)
             }
         }
     }
 
-    private fun getUser(nickname: String) = UserModel(
-        id = UUID.randomUUID().toString(),
-        nickname = nickname,
-        avatarURL = null
+    private fun generateUserModelByNickname(nickname: String) = UserModel(
+        UUID.randomUUID().toString(), nickname, null
     )
 
     private suspend fun saveLoggedUser(user: UserModel) {
@@ -86,5 +87,19 @@ class LoginViewModel @Inject constructor(
                 _navigateToMessagesFlow.value = sessionModelMapper.mapToDomain(it).user
             }
         }
+    }
+
+    fun checkNickname(nickname: CharSequence) {
+        val sterilizedNickname = nickname.toString().trim()
+        if (loginValidationHelper.isValidNickname(sterilizedNickname)) {
+            state[NICKNAME_STATE_KEY] = sterilizedNickname
+            _continueButtonIsEnableFlow.value = true
+            return
+        }
+        _continueButtonIsEnableFlow.value = false
+    }
+
+    companion object {
+        private const val NICKNAME_STATE_KEY = "nicknameStateKey"
     }
 }

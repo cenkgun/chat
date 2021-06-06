@@ -9,12 +9,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment.findNavController
 import com.cenkgun.presentation.databinding.FragmentLoginBinding
-import com.cenkgun.presentation.ui.login.validation.LoginValidationHelper
 import com.cenkgun.presentation.ui.login.viewmodel.LoginViewModel
-import com.cenkgun.presentation.utils.showToast
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.dropWhile
 import reactivecircus.flowbinding.android.view.clicks
 import reactivecircus.flowbinding.android.widget.textChanges
 
@@ -42,22 +39,20 @@ class LoginFragment : Fragment() {
     }
 
     private fun initListeners() {
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenStarted {
             binding.nicknameInput.textChanges().collect {
-                binding.enterButton.isEnabled =
-                    LoginValidationHelper.buttonCanBeEnable(it.toString())
+                viewModel.checkNickname(it)
             }
         }
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenStarted {
             binding.enterButton.clicks().collect {
-                val nickname = binding.nicknameInput.text.toString()
-                viewModel.login(nickname)
+                viewModel.login()
             }
         }
     }
 
     private fun observeViewModel() {
-        lifecycleScope.launchWhenCreated {
+        lifecycleScope.launchWhenStarted {
             viewModel.navigateToMessagesFlow.collect { user ->
                 user?.let {
                     navController.navigate(
@@ -67,8 +62,8 @@ class LoginFragment : Fragment() {
             }
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.showErrorFlow.dropWhile { it.isEmpty() }.collect { message ->
-                showToast(message)
+            viewModel.continueButtonIsEnableFlow.collect { isEnabled ->
+                binding.enterButton.isEnabled = isEnabled
             }
         }
     }

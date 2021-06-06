@@ -3,6 +3,7 @@ package com.cenkgun.presentation.ui.message.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cenkgun.domain.helper.MessageValidationHelper
 import com.cenkgun.domain.models.Message
 import com.cenkgun.domain.providers.ResourceProvider
 import com.cenkgun.domain.usecases.*
@@ -26,6 +27,7 @@ class MessageViewModel @Inject constructor(
     private val getFlowMessageListFromDatabaseUseCase: GetFlowMessageListFromDatabaseUseCase,
     private val deleteLoggedInUserUseCase: DeleteLoggedInUserUseCase,
     private val saveUserListUseCase: SaveUserListUseCase,
+    private val messageValidationHelper: MessageValidationHelper,
     private val resourceProvider: ResourceProvider,
     private val userMapper: UserModelMapper,
     private val messageMapper: MessageModelMapper,
@@ -42,6 +44,11 @@ class MessageViewModel @Inject constructor(
             viewModelScope, MESSAGE_LIST_SAVED_STATE_KEY, listOf()
         )
 
+    val sendButtonIsEnableFlow
+        get() : StateFlow<Boolean> = state.stateFlow(
+            viewModelScope, SEND_BUTTON_IS_ENABLE_SAVED_STATE_KEY, false
+        )
+
     private val _clearInputFlow = MutableStateFlow(Any())
     val clearInputFlow get() : StateFlow<Any> = _clearInputFlow
 
@@ -50,9 +57,6 @@ class MessageViewModel @Inject constructor(
 
     private val _showToastFlow = MutableStateFlow("")
     val showToastFlow get() : StateFlow<String> = _showToastFlow
-
-    private val _isSendButtonEnableFlow = MutableStateFlow(true)
-    val isSendButtonEnableFlow get() = _isSendButtonEnableFlow
 
     private fun saveMessage(messageText: String) {
         getLoggedInUser()?.let { user ->
@@ -68,7 +72,7 @@ class MessageViewModel @Inject constructor(
             getMessageListFromRemoteUseCase()
                 .catch {
                     deleteLoggedInUserUseCase()
-                    _isSendButtonEnableFlow.value = false
+                    state[SEND_BUTTON_IS_ENABLE_SAVED_STATE_KEY] = false
                     _showToastFlow.value =
                         resourceProvider.getString(R.string.check_your_connection)
                 }.map {
@@ -117,6 +121,8 @@ class MessageViewModel @Inject constructor(
         return state.get<UserModel>(USER_SAVED_STATE_KEY)
     }
 
+    private fun getInputMessage(): String? = state.get(INPUT_MESSAGE_SAVED_STATE_KEY)
+
     fun setLoggedInUser(user: UserModel) {
         state[USER_SAVED_STATE_KEY] = user
     }
@@ -128,17 +134,32 @@ class MessageViewModel @Inject constructor(
         }
     }
 
-    fun handleOnSendButtonClicked(messageText: String) {
-        saveMessage(messageText)
-        _clearInputFlow.value = Any()
+    fun handleOnSendButtonClicked() {
+        val inputMessage = getInputMessage()
+        inputMessage?.let {
+            saveMessage(it)
+            _clearInputFlow.value = Any()
+        }
     }
 
     fun handleOnBackPressed() {
         leaveConversation()
     }
 
+    fun checkMessage(message: String) {
+        if (messageValidationHelper.isValidMessage(message)) {
+            state[SEND_BUTTON_IS_ENABLE_SAVED_STATE_KEY] = true
+            state[INPUT_MESSAGE_SAVED_STATE_KEY] = message
+            return
+        }
+        state[SEND_BUTTON_IS_ENABLE_SAVED_STATE_KEY] = false
+        state[INPUT_MESSAGE_SAVED_STATE_KEY] = null
+    }
+
     companion object {
         private const val MESSAGE_LIST_SAVED_STATE_KEY = "messageListSavedStateKey"
         private const val USER_SAVED_STATE_KEY = "userSavedStateKey"
+        private const val SEND_BUTTON_IS_ENABLE_SAVED_STATE_KEY = "sendButtonIsEnableSavedStateKey"
+        private const val INPUT_MESSAGE_SAVED_STATE_KEY = "inputMessageSavedStateKey"
     }
 }
