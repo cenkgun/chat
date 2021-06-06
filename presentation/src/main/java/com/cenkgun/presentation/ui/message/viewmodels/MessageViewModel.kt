@@ -1,10 +1,10 @@
 package com.cenkgun.presentation.ui.message.viewmodels
 
-import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cenkgun.domain.models.Message
+import com.cenkgun.domain.providers.ResourceProvider
 import com.cenkgun.domain.usecases.*
 import com.cenkgun.presentation.R
 import com.cenkgun.presentation.mapper.MessageModelMapper
@@ -26,6 +26,7 @@ class MessageViewModel @Inject constructor(
     private val getFlowMessageListFromDatabaseUseCase: GetFlowMessageListFromDatabaseUseCase,
     private val deleteLoggedInUserUseCase: DeleteLoggedInUserUseCase,
     private val saveUserListUseCase: SaveUserListUseCase,
+    private val resourceProvider: ResourceProvider,
     private val userMapper: UserModelMapper,
     private val messageMapper: MessageModelMapper,
     private val state: SavedStateHandle
@@ -47,8 +48,8 @@ class MessageViewModel @Inject constructor(
     private val _leaveConversationFlow = MutableStateFlow(false)
     val leaveConversationFlow get(): StateFlow<Boolean> = _leaveConversationFlow
 
-    private val _showToastFlow = MutableStateFlow(0)
-    val showToastFlow get() : StateFlow<@StringRes Int> = _showToastFlow
+    private val _showToastFlow = MutableStateFlow("")
+    val showToastFlow get() : StateFlow<String> = _showToastFlow
 
     private val _isSendButtonEnableFlow = MutableStateFlow(true)
     val isSendButtonEnableFlow get() = _isSendButtonEnableFlow
@@ -68,7 +69,8 @@ class MessageViewModel @Inject constructor(
                 .catch {
                     deleteLoggedInUserUseCase()
                     _isSendButtonEnableFlow.value = false
-                    _showToastFlow.value = R.string.check_your_connection
+                    _showToastFlow.value =
+                        resourceProvider.getString(R.string.check_your_connection)
                 }.map {
                     messageMapper.mapToModelList(it)
                 }.collect { messageList ->

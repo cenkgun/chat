@@ -67,8 +67,8 @@ class LoginFragment : Fragment() {
             }
         }
         lifecycleScope.launchWhenStarted {
-            viewModel.showErrorFlow.dropWhile { it == 0 }.collect { stringRes ->
-                showToast(getString(stringRes))
+            viewModel.showErrorFlow.dropWhile { it.isEmpty() }.collect { message ->
+                showToast(message)
             }
         }
     }
