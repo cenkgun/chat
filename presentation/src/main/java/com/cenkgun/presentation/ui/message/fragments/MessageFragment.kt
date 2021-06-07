@@ -51,14 +51,6 @@ class MessageFragment : Fragment() {
         viewModel.setLoggedInUser(args.user)
         observeViewModel()
         initLayout()
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    viewModel.handleOnBackPressed()
-                }
-            }
-        )
     }
 
     private fun initLayout() {
@@ -104,6 +96,14 @@ class MessageFragment : Fragment() {
                 viewModel.checkMessage(it.toString())
             }
         }
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    viewModel.handleOnBackPressed()
+                }
+            }
+        )
     }
 
     private fun observeViewModel() {
