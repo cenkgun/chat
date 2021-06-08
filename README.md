@@ -1,6 +1,6 @@
-# ChatApp for Android
+# Chat for Android
 
-ChatApp is a sample project that presents a modern, 2021 approach to [Android](https://en.wikipedia.org/wiki/Android_(operating_system)) application development.
+Chat is a sample project that presents a modern, 2021 approach to [Android](https://en.wikipedia.org/wiki/Android_(operating_system)) application development.
 
 ## Screenshots 📷
 <img src="/art/art-1.png" width="260"> &emsp;<img src="/art/art-4.png" width="260"> &emsp;<img src="/art/art-5.png" width="260">
